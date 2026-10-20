@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MovieSpace — кінотест</title>
+<style>
+:root{--bg:#07061a;--panel:#12102e;--line:#2d2766;--p:#a855f7;--b:#38bdf8;--t:#eef0ff;--m:#9a9cc9;--ok:#34d399;--no:#fb7185}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:radial-gradient(900px 500px at 15% -10%,#3b1a7a55,transparent),radial-gradient(800px 500px at 100% 10%,#0a4a8a44,transparent),var(--bg);color:var(--t);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.45}
+.stars{position:fixed;inset:0;z-index:-1;background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff8,transparent),radial-gradient(1px 1px at 120px 80px,#a5b4fc99,transparent),radial-gradient(1.5px 1.5px at 200px 160px,#fff6,transparent);background-size:240px 200px;animation:drift 60s linear infinite}
+@keyframes drift{to{background-position:240px 200px}}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:#0a0820cc;backdrop-filter:blur(8px);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.logo{background:none;font-size:1.4rem;font-weight:800;letter-spacing:.5px}
+.logo span{color:var(--p);text-shadow:0 0 14px var(--p)}
+.lvl{display:flex;align-items:center;gap:10px;font-size:.85rem}
+.xp{width:120px;height:8px;border-radius:9px;background:#1d1a45;overflow:hidden}
+.xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--b));box-shadow:0 0 10px var(--p);transition:width .5s}
+.lvl small{color:var(--m)}
+main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+.screen{display:none}
+.screen.active{display:block;animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.1;text-shadow:0 0 24px #a855f788}
+h2{font-size:1.5rem;margin:8px 0 16px}
+.sub{color:var(--m);margin:8px 0 18px}
+input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--t);font:inherit;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:4px;transition:.25s}
+.card em{font-style:normal;font-size:2rem}
+.card small{color:var(--m)}
+.card:hover{transform:translateY(-4px);border-color:var(--p);box-shadow:0 0 22px #a855f755}
+.card.alt:hover{border-color:var(--b);box-shadow:0 0 22px #38bdf855}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--m);margin-bottom:12px;flex-wrap:wrap}
+.bar b{color:var(--t)}
+.ghost{background:transparent!important;border:1px solid var(--line)!important;border-radius:10px;padding:6px 12px}
+.btn{background:linear-gradient(90deg,var(--p),var(--b));padding:12px 20px;border-radius:12px;font-weight:700;box-shadow:0 0 18px #a855f766;transition:.2s}
+.btn.ghost{box-shadow:none}
+.btn:hover{transform:translateY(-2px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.opt{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;transition:.2s}
+.opt:hover:not(:disabled){border-color:var(--b);box-shadow:0 0 14px #38bdf855}
+.opt.ok{border-color:var(--ok);background:#34d39922;box-shadow:0 0 16px #34d39966}
+.opt.no{border-color:var(--no);background:#fb718522;animation:shake .35s}
+.opt.off{opacity:.25}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.timer{position:relative;height:22px;border-radius:12px;background:#1d1a45;overflow:hidden;margin-bottom:16px}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--b),var(--p));transition:width 1s linear}
+.timer b{position:absolute;inset:0;text-align:center;font-size:.8rem;line-height:22px}
+.timer.low i{background:var(--no)}
+#clue{margin-bottom:12px}
+.poster{position:relative;width:min(220px,60%);aspect-ratio:2/3;margin:0 auto;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid #fff3;box-shadow:0 0 30px var(--glow,#a855f777);overflow:hidden;text-align:center;padding:10px}
+.poster .big{font-size:3rem;line-height:1.1;transition:filter .5s}
+.poster.blur .big{filter:blur(9px)}
+.poster .yr{position:absolute;bottom:10px;font-size:.8rem;opacity:.85}
+.poster .ttl{font-weight:800;font-size:1.1rem;text-shadow:0 2px 8px #000}
+.poster::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,#fff3 50%,transparent 60%);animation:shine 3s infinite}
+@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.text{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--p);padding:16px;border-radius:12px;font-size:1.05rem}
+.emo{font-size:clamp(2.2rem,10vw,3.4rem);text-align:center;letter-spacing:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.hint{min-height:22px;color:var(--b);margin-bottom:10px;text-align:center}
+.list{list-style:none;display:grid;gap:8px;padding:0}
+.list li{display:flex;justify-content:space-between;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.list li:first-child{border-color:var(--p);box-shadow:0 0 16px #a855f755}
+.list small{color:var(--m)}
+.ach .card{opacity:.4;filter:grayscale(1)}
+.ach .card.got{opacity:1;filter:none;border-color:var(--p)}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.6rem;color:var(--b)}
+#pickBox .poster{margin-bottom:14px}
+#pickBox p{text-align:center;color:var(--m);margin-top:6px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--panel);border:1px solid var(--p);box-shadow:0 0 24px #a855f7aa;padding:12px 20px;border-radius:14px;transition:.4s;z-index:9;max-width:90%}
+#toast.show{transform:translate(-50%,0)}
+@media(max-width:520px){.xp{width:80px}main{padding-top:16px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.top{top:env(safe-area-inset-top,0px)}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<header class="top">
+  <button class="logo" id="logo">🎬 Movie<span>Space</span></button>
+  <div class="lvl">
+    <b id="lvlTxt">Рівень 1</b>
+    <div class="xp"><i id="xpBar"></i></div>
+    <small id="xpTxt">0 / 100</small>
+  </div>
+</header>
+
+<main>
+  <!-- Меню -->
+  <section id="menu" class="screen active">
+    <h1>Знайди свій фільм</h1>
+    <p class="sub">Пройди тест, вгадуй кіно та збирай досягнення</p>
+    <input id="name" maxlength="14" placeholder="Твоє ім’я" aria-label="Ім’я гравця">
+    <div class="grid">
+      <button class="card" data-act="quiz"><em>🔮</em><b>Підбір фільму</b><small>Тест про настрій і смаки</small></button>
+      <button class="card" data-act="poster"><em>🖼️</em><b>Вгадай за постером</b><small>Розмитий постер</small></button>
+      <button class="card" data-act="desc"><em>📖</em><b>Вгадай за описом</b><small>Короткий сюжет</small></button>
+      <button class="card" data-act="emoji"><em>😀</em><b>Вгадай за емодзі</b><small>Фільм у смайликах</small></button>
+      <button class="card alt" data-act="records"><em>🏆</em><b>Таблиця рекордів</b><small>Найкращі гравці</small></button>
+      <button class="card alt" data-act="ach"><em>⭐</em><b>Досягнення</b><small id="achCount"></small></button>
+    </div>
+  </section>
+
+  <!-- Тест -->
+  <section id="quiz" class="screen">
+    <div class="bar"><span id="qStep"></span><button class="ghost" data-act="menu">✕</button></div>
+    <h2 id="qTitle"></h2>
+    <div id="qOpts" class="opts"></div>
+  </section>
+
+  <!-- Результат тесту -->
+  <section id="pick" class="screen">
+    <h2>Твій ідеальний фільм</h2>
+    <div id="pickBox"></div>
+    <div class="row"><button class="btn" data-act="quiz">Пройти ще раз</button><button class="btn ghost" data-act="menu">У меню</button></div>
+  </section>
+
+  <!-- Гра -->
+  <section id="game" class="screen">
+    <div class="bar">
+      <span>Раунд <b id="gRound">1</b>/10</span>
+      <span>Бали <b id="gScore">0</b></span>
+      <span>✔ <b id="gOk">0</b></span>
+      <span>🔥 <b id="gStreak">0</b></span>
+      <button class="ghost" data-act="menu">✕</button>
+    </div>
+    <div class="timer"><i id="tBar"></i><b id="tTxt">20</b></div>
+    <div id="clue"></div>
+    <p id="hintTxt" class="hint"></p>
+    <div id="gOpts" class="opts"></div>
+    <div class="row"><button class="btn" id="hintBtn">💡 Підказка (−5)</button><button class="btn ghost" id="nextBtn" hidden>Далі ▶</button></div>
+  </section>
+
+  <!-- Підсумок -->
+  <section id="result" class="screen">
+    <h2>Гру завершено!</h2>
+    <div id="resBox"></div>
+    <div class="row"><button class="btn" id="again">Грати ще</button><button class="btn ghost" data-act="records">Рекорди</button><button class="btn ghost" data-act="menu">Меню</button></div>
+  </section>
+
+  <!-- Рекорди -->
+  <section id="records" class="screen">
+    <h2>🏆 Таблиця рекордів</h2>
+    <ol id="recList" class="list"></ol>
+    <div class="row"><button class="btn ghost" data-act="menu">Назад</button><button class="btn ghost" id="clearRec">Очистити</button></div>
+  </section>
+
+  <!-- Досягнення -->
+  <section id="ach" class="screen">
+    <h2>⭐ Досягнення</h2>
+    <div id="achList" class="grid ach"></div>
+    <div class="row"><button class="btn ghost" data-act="menu">Назад</button></div>
+  </section>
+</main>
+<div id="toast"></div>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const MOVIES = [
+ {t:"Володар перснів: Братство персня",y:2001,g:["фентезі","пригоди"],e:"🧙‍♂️💍🌋",c:["#3b2a0a","#7c3aed"],d:"Скромний мешканець тихого краю отримує невеликий золотий предмет і вирушає з відважною групою друзів знищити його у вогні гори."},
+ {t:"Початок",y:2010,g:["фантастика","трилер"],e:"🌀🏙️💤",c:["#0f172a","#38bdf8"],d:"Злодій, що краде таємниці зі снів, отримує завдання не вкрасти, а непомітно підкинути ідею в голову бізнесмена."},
+ {t:"Титанік",y:1997,g:["романтика","драма"],e:"🚢🧊💔",c:["#0c4a6e","#be185d"],d:"Юна аристократка та бідний художник закохуються на борту велетенського лайнера, що прямує через Атлантику до своєї долі."},
+ {t:"Король Лев",y:1994,g:["мультфільм","сімейний"],e:"🦁👑🌅",c:["#92400e","#f59e0b"],d:"Молодий спадкоємець саванни тікає після трагедії, але мусить повернутися, щоб відвоювати своє королівство."},
+ {t:"Матриця",y:1999,g:["фантастика","бойовик"],e:"💊🕶️💻",c:["#052e16","#22c55e"],d:"Хакер дізнається, що реальність — лише симуляція, і обирає між червоною та синьою пігулкою."},
+ {t:"Гаррі Поттер і філософський камінь",y:2001,g:["фентезі","сімейний","пригоди"],e:"⚡🦉🪄",c:["#450a0a","#a855f7"],d:"Хлопчик, що жив у комірчині під сходами, дізнається, що він чарівник, і їде вчитися в школу магії."},
+ {t:"Інтерстеллар",y:2014,g:["фантастика","драма"],e:"🚀🕳️⏳",c:["#020617","#6366f1"],d:"Пілот залишає доньку на вмираючій Землі, щоб пролетіти крізь червоточину та знайти людству новий дім."},
+ {t:"Крижане серце",y:2013,g:["мультфільм","сімейний","фентезі"],e:"❄️👸⛄",c:["#164e63","#67e8f9"],d:"Принцеса з незвичайним даром мимоволі занурює своє королівство в вічну зиму, а її сестра вирушає її рятувати."},
+ {t:"Зоряні війни: Нова надія",y:1977,g:["фантастика","пригоди","бойовик"],e:"⚔️🌌🤖",c:["#1e1b4b","#facc15"],d:"Фермер із пустельної планети приєднується до повстанців, контрабандиста та двох роботів, щоб зруйнувати зброю імперії."},
+ {t:"Джокер",y:2019,g:["драма","трилер"],e:"🃏🤡🪜",c:["#3f0d12","#16a34a"],d:"Невдалий комік із вулиць похмурого міста поступово перетворюється на символ хаосу."},
+ {t:"Шрек",y:2001,g:["комедія","мультфільм","сімейний"],e:"🧌🐴🏰",c:["#14532d","#84cc16"],d:"Бурчливий мешканець болота вирушає рятувати принцесу заради повернення тиші, а за ним їде балакучий віслюк."},
+ {t:"Пірати Карибського моря: Прокляття «Чорної перлини»",y:2003,g:["пригоди","комедія","фентезі"],e:"🏴‍☠️⚓🦜",c:["#1c1917","#0ea5e9"],d:"Ексцентричний капітан-пройдисвіт і коваль женуться за кораблем із проклятою командою, що не може померти."},
+ {t:"Форрест Гамп",y:1994,g:["драма","романтика","комедія"],e:"🏃🍫🪶",c:["#334155","#fbbf24"],d:"Простодушний чоловік випадково опиняється поруч із ключовими подіями десятиліть, не припиняючи кохати подругу дитинства."},
+ {t:"Паразити",y:2019,g:["трилер","драма","комедія"],e:"🏠🍑🪨",c:["#1f2937","#10b981"],d:"Бідна родина по черзі влаштовується на роботу в розкішний дім багатіїв, приховуючи, що вони пов’язані."},
+ {t:"Парк Юрського періоду",y:1993,g:["пригоди","фантастика","трилер"],e:"🦖🚙🧬",c:["#14532d","#f97316"],d:"Відкриття острівного заповідника з клонованими велетенськими рептиліями закінчується відключенням охорони."},
+ {t:"Один вдома",y:1990,g:["комедія","сімейний"],e:"🏠🎄🪤",c:["#7f1d1d","#22c55e"],d:"Вісімирічного хлопчика забувають вдома на Різдво, і він власноруч облаштовує пастки для двох невдалих злодіїв."}
+];
+const QUIZ = [
+ {q:"Який у тебе настрій?",o:[["😂 Хочу посміятися",["комедія","сімейний"]],["🥹 Хочу розчулитись",["романтика","драма"]],["⚡ Потрібен адреналін",["бойовик","трилер","пригоди"]],["🧠 Хочу подумати",["фантастика","трилер"]]]},
+ {q:"Який жанр улюблений?",o:[["🐉 Фентезі",["фентезі","фентезі"]],["🛸 Фантастика",["фантастика","фантастика"]],["🎭 Драма",["драма","драма"]],["🎈 Мультфільм",["мультфільм","мультфільм"]]]},
+ {q:"З ким дивишся кіно?",o:[["🧍 Сам(а)",["трилер","драма"]],["👨‍👩‍👧 З родиною",["сімейний","мультфільм"]],["🧑‍🤝‍🧑 З друзями",["бойовик","комедія"]],["💞 З коханою людиною",["романтика","пригоди"]]]}
+];
+const ACH = [
+ ["first","🎯","Перший успіх","Одна правильна відповідь"],
+ ["s5","🔥","Серія 5","5 правильних поспіль"],
+ ["p200","💎","200 балів","Набери 200 балів за гру"],
+ ["perfect","👑","Кіноман","10/10 в одній грі"],
+ ["quiz","🔮","Знаю твій смак","Пройди тест підбору"],
+ ["lvl3","🚀","Рівень 3","Досягни 3 рівня"],
+ ["all","🌈","Усі режими","Зіграй у всі три режими"],
+ ["fast","⏱️","Блискавка","Відповідь за 3 секунди"]
+];
+const MODES = {poster:"Постер",desc:"Опис",emoji:"Емодзі"};
+let P = {name:"",xp:0,ach:[],rec:[],modes:[]};
+try{const s=JSON.parse(localStorage.getItem("moviespace"));if(s)P=Object.assign(P,s)}catch(e){}
+const save=()=>{try{localStorage.setItem("moviespace",JSON.stringify(P))}catch(e){}};
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const lvl=()=>Math.floor(P.xp/100)+1;
+
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));window.scrollTo(0,0)}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2600)}
+function unlock(k){if(P.ach.includes(k))return;P.ach.push(k);const a=ACH.find(x=>x[0]===k);toast(`${a[1]} Досягнення: ${a[2]}!`);save();ui()}
+function addXp(n){const before=lvl();P.xp+=n;if(lvl()>before)toast(`⬆️ Новий рівень: ${lvl()}!`);if(lvl()>=3)unlock("lvl3");save();ui()}
+function ui(){
+ const l=lvl(),r=P.xp%100;
+ $("lvlTxt").textContent="Рівень "+l;$("xpBar").style.width=r+"%";$("xpTxt").textContent=r+" / 100";
+ $("achCount").textContent=`${P.ach.length} з ${ACH.length} відкрито`;
+ $("name").value=P.name;
+}
+function poster(m,blur,full){
+ return `<div class="poster ${blur?"blur":""}" id="pst" style="background:linear-gradient(160deg,${m.c[0]},${m.c[1]});--glow:${m.c[1]}">
+ <div class="big">${m.e}</div>${full?`<div class="ttl">${m.t}</div>`:""}<div class="yr">${full?m.g.join(", ")+" • ":""}${full?m.y:"🎬 MovieSpace"}</div></div>`;
+}
+
+/* ---------- Тест підбору ---------- */
+let qi=0,tags=[];
+function startQuiz(){qi=0;tags=[];show("quiz");askQ()}
+function askQ(){
+ const q=QUIZ[qi];$("qStep").textContent=`Питання ${qi+1} з ${QUIZ.length}`;$("qTitle").textContent=q.q;
+ $("qOpts").innerHTML="";
+ q.o.forEach(([txt,t])=>{const b=document.createElement("button");b.className="opt";b.textContent=txt;
+  b.onclick=()=>{tags.push(...t);if(++qi<QUIZ.length)askQ();else finishQuiz()};$("qOpts").appendChild(b)});
+}
+function finishQuiz(){
+ const sc=MOVIES.map(m=>({m,s:m.g.reduce((a,g)=>a+tags.filter(t=>t===g).length,0)+Math.random()*.5}));
+ sc.sort((a,b)=>b.s-a.s);const m=sc[0].m,pct=Math.min(99,60+Math.round(sc[0].s*8));
+ $("pickBox").innerHTML=poster(m,false,true)+`<p>Збіг із твоїми смаками: <b style="color:#38bdf8">${pct}%</b></p><p>${m.d}</p>`;
+ show("pick");addXp(20);unlock("quiz");toast("+20 балів досвіду");
+}
+
+/* ---------- Ігрові режими ---------- */
+let G=null,timer=null;
+function startGame(mode){
+ G={mode,round:0,score:0,ok:0,streak:0,best:0,left:20,hint:false,locked:false,deck:shuffle(MOVIES).slice(0,10)};
+ show("game");nextRound();
+}
+function nextRound(){
+ clearInterval(timer);
+ if(G.round>=10)return endGame();
+ const m=G.deck[G.round];G.cur=m;G.round++;G.left=20;G.hint=false;G.locked=false;
+ $("gRound").textContent=G.round;$("gScore").textContent=G.score;$("gOk").textContent=G.ok;$("gStreak").textContent=G.streak;
+ $("hintTxt").textContent="";$("nextBtn").hidden=true;$("hintBtn").disabled=false;
+ $("clue").innerHTML=G.mode==="poster"?poster(m,true,false):G.mode==="desc"?`<div class="text">📖 ${m.d}</div>`:`<div class="emo">${m.e}</div>`;
+ const opts=shuffle([m,...shuffle(MOVIES.filter(x=>x!==m)).slice(0,3)]);
+ $("gOpts").innerHTML="";
+ opts.forEach(o=>{const b=document.createElement("button");b.className="opt";b.textContent=o.t;b.onclick=()=>answer(o,b);$("gOpts").appendChild(b)});
+ tick(true);timer=setInterval(tick,1000);
+}
+function tick(first){
+ if(!first)G.left--;
+ const b=$("tBar");$("tTxt").textContent=G.left+" с";b.style.width=(G.left/20*100)+"%";b.parentElement.classList.toggle("low",G.left<=5);
+ if(G.left<=0){clearInterval(timer);answer(null)}
+}
+function answer(o,btn){
+ if(G.locked)return;G.locked=true;clearInterval(timer);
+ const m=G.cur,good=o===m,taken=20-G.left;
+ [...$("gOpts").children].forEach(b=>{b.disabled=true;if(b.textContent===m.t)b.classList.add("ok")});
+ if(btn&&!good)btn.classList.add("no");
+ const p=$("pst");if(p)p.classList.remove("blur");
+ if(good){
+  const pts=Math.max(5,10+G.left-(G.hint?5:0));
+  G.score+=pts;G.ok++;G.streak++;G.best=Math.max(G.best,G.streak);
+  $("hintTxt").textContent=`✅ Правильно! +${pts} балів`;
+  unlock("first");if(G.streak>=5)unlock("s5");if(taken<=3)unlock("fast");
+ }else{G.streak=0;$("hintTxt").textContent=o?`❌ Це був фільм «${m.t}»`:`⏰ Час вийшов! Це «${m.t}»`}
+ $("gScore").textContent=G.score;$("gOk").textContent=G.ok;$("gStreak").textContent=G.streak;
+ $("hintBtn").disabled=true;$("nextBtn").hidden=false;$("nextBtn").textContent=G.round>=10?"Результат ▶":"Далі ▶";
+}
+function useHint(){
+ if(G.locked||G.hint)return;G.hint=true;$("hintBtn").disabled=true;
+ const wrong=[...$("gOpts").children].filter(b=>b.textContent!==G.cur.t);
+ shuffle(wrong).slice(0,2).forEach(b=>{b.classList.add("off");b.disabled=true});
+ const p=$("pst");if(p)p.classList.remove("blur");
+ $("hintTxt").textContent=`💡 Жанр: ${G.cur.g.join(", ")} • Рік: ${G.cur.y}`;
+}
+function endGame(){
+ const name=P.name||"Гравець";
+ P.rec.push({n:name,s:G.score,m:MODES[G.mode],ok:G.ok,d:new Date().toLocaleDateString("uk-UA")});
+ P.rec.sort((a,b)=>b.s-a.s);P.rec=P.rec.slice(0,10);
+ if(!P.modes.includes(G.mode))P.modes.push(G.mode);
+ if(P.modes.length>=3)unlock("all");if(G.score>=200)unlock("p200");if(G.ok===10)unlock("perfect");
+ addXp(G.score);
+ const rank=G.ok>=9?"🎬 Режисер":G.ok>=6?"🍿 Кінокритик":G.ok>=3?"🎞️ Глядач":"🌱 Новачок";
+ $("resBox").innerHTML=`<div class="stat"><div><b>${G.score}</b>балів</div><div><b>${G.ok}/10</b>правильно</div><div><b>${G.best}</b>найкраща серія</div><div><b>${rank}</b>звання</div></div>`;
+ show("result");
+}
+
+/* ---------- Рекорди та досягнення ---------- */
+function showRecords(){
+ $("recList").innerHTML=P.rec.length?P.rec.map((r,i)=>`<li><span>${["🥇","🥈","🥉"][i]||i+1+"."} <b>${r.n}</b> <small>${r.m}, ${r.ok}/10, ${r.d}</small></span><b>${r.s}</b></li>`).join(""):`<li>Поки порожньо. Зіграй першу гру!</li>`;
+ show("records");
+}
+function showAch(){
+ $("achList").innerHTML=ACH.map(a=>`<div class="card ${P.ach.includes(a[0])?"got":""}"><em>${a[1]}</em><b>${a[2]}</b><small>${a[3]}</small></div>`).join("");
+ show("ach");
+}
+
+/* ---------- Події ---------- */
+let last="poster";
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]");if(!b)return;
+ const a=b.dataset.act;
+ if(a==="menu"){clearInterval(timer);ui();show("menu")}
+ else if(a==="quiz")startQuiz();
+ else if(a==="records")showRecords();
+ else if(a==="ach")showAch();
+ else{last=a;startGame(a)}
+});
+$("logo").onclick=()=>{clearInterval(timer);show("menu")};
+$("name").oninput=e=>{P.name=e.target.value.trim();save()};
+$("hintBtn").onclick=useHint;
+$("nextBtn").onclick=nextRound;
+$("again").onclick=()=>startGame(last);
+$("clearRec").onclick=()=>{if(confirm("Очистити таблицю рекордів?")){P.rec=[];save();showRecords()}};
+ui();
+</script>
+</body>
+</html>
